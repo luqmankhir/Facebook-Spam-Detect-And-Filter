@@ -7,7 +7,7 @@
 var xpathPatterns = [];
 
 chrome.storage.sync.get({
-    blacklist: 'FilterBubble'
+    blacklist: 'FBFilter'
 }, function(items) {
     badWords = items.blacklist.toLowerCase().split(/\r?\n/);
     for(var i = 0; i < badWords.length; i++) {

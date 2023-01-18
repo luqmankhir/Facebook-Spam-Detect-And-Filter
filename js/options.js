@@ -17,7 +17,7 @@ function save_options() {
 function restore_options() {
     // Use default value blacklist = 'FilterBubble'
     chrome.storage.sync.get({
-        blacklist: 'FilterBubble',
+        blacklist: 'FBFilter',
     }, function(items) {
         document.getElementById('blacklist').value = items.blacklist;
     });
