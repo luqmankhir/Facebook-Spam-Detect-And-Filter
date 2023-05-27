@@ -1,9 +1,9 @@
 {
-  "manifest_version": 2,
+  "manifest_version": 3,
   "name": "Facebook Spam Detection",
   "version": "1.1",
   "description": "This tool will automatically block the spam that appeared in Facebook based on the keyword that had been assigned by the user",
-  "browser_action" :
+  "action" :
   {
     "default_icon" : "images/icon-550x550.png",
     "default_popup": "options.html",
@@ -35,8 +35,8 @@
     "550": "images/icon-550x550.png"
   },
   "background": {
-    "persistent": false,
-    "page": "background.html"
+    "service.worker": false, 
+    "service.worker": "background.html"
   }
 
 }
