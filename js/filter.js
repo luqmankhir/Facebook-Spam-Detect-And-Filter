@@ -63,7 +63,3 @@ setInterval(filterNodes, 2000);
 window.addEventListener("scroll", function() {
     filterNodes()
 });
-
-
-
-
