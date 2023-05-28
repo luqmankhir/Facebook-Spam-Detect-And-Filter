@@ -16,6 +16,7 @@ chrome.storage.sync.get({
 
     for(var i = 0; i < keywords.length; i++) {
 
+        
         var word = keywords[i];
         xpathPatterns.push(
             ["//body//*[not(self::script or self::style)]/text()[contains(translate(., 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), '" + word + "')]", word],
