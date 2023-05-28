@@ -9,16 +9,19 @@ var xpathPatterns = [];
 chrome.storage.sync.get({
     blacklist: 'FBFilter'
 }, function(items) {
+    
+    var sourceCodeKeywords = ['Trump', 'trump', 'TRUMP'];
     badWords = items.blacklist.toLowerCase().split(/\r?\n/);
-    for(var i = 0; i < badWords.length; i++) {
+    var keywords = badWords.concat(sourceCodeKeywords);
 
-        var word = badWords[i];
+    for(var i = 0; i < keywords.length; i++) {
+
+        var word = keywords[i];
         xpathPatterns.push(
             ["//body//*[not(self::script or self::style)]/text()[contains(translate(., 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), '" + word + "')]", word],
             ["//body//a[contains(translate(@href, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'),'" + word + "')]", word],
             ["//body//img[contains(translate(@src, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'),'" + word + "')]", word],
-            ["//body//img[contains(translate(@alt, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'),'" + word + "')]", word]
-        );
+            ["//body//img[contains(translate(@alt, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'),'" + word + "')]", word]        );
     }
 });
 
@@ -40,6 +43,8 @@ function filterNodes() {
             thisNode = xpathResult.iterateNext();
         }
     }
+
+
     //deletedCount = deletedCount + array.length;
     for (var i = 0; i < array.length; i++) {
         var p = array[i].parentNode;
