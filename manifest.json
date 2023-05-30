@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Facebook Spam Detection",
-  "version": "1.1",
+  "version": "1.2",
   "description": "This tool will automatically block the spam that appeared in Facebook based on the keyword that had been assigned by the user",
   "action" :
   {

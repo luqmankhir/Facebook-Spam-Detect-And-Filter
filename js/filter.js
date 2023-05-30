@@ -6,6 +6,9 @@
 
 var xpathPatterns = [];
 
+
+
+
 chrome.storage.sync.get({
     blacklist: 'FBFilter'
 }, function(items) {
@@ -26,7 +29,16 @@ chrome.storage.sync.get({
     }
 });
 
-function filterNodes() {
+
+function confirmFilterKeyword(keyword) {
+    return confirm("Do you want to block the keywords: " + keyword + "?");
+  }
+
+
+
+//Instantly block the word\
+/*
+  function filterNodes() {
     var array = new Array();
     for (i = 0; i < xpathPatterns.length; i++) {
         var xpathResult =
@@ -53,6 +65,39 @@ function filterNodes() {
             p.removeChild(array[i]);
     }
 }
+*/
+
+
+//Prompt error before block the spam keywords
+function filterNodes() {
+    var filteredNodes = [];
+  
+    for (i = 0; i < xpathPatterns.length; i++) {
+      var xpathResult = document.evaluate(xpathPatterns[i][0], document, null, XPathResult.UNORDERED_NODE_ITERATOR_TYPE, null);
+      var thisNode = xpathResult.iterateNext();
+      
+      while (thisNode) {
+        var regex = new RegExp("(\\b|_)(" + xpathPatterns[i][1] + ")(\\b|_|s)", "i");
+        if (regex.test(thisNode.data)) {
+          filteredNodes.push({ node: thisNode, keyword: xpathPatterns[i][1] });
+        }
+        thisNode = xpathResult.iterateNext();
+      }
+    }
+  
+    for (var i = 0; i < filteredNodes.length; i++) {
+      var node = filteredNodes[i].node;
+      var keyword = filteredNodes[i].keyword;
+      
+      if (confirmFilterKeyword(keyword)) {
+        var p = node.parentNode;
+        if (p !== null)
+          p.removeChild(node);
+      }
+    }
+  }
+  
+
 
 window.addEventListener("load", function() {
     filterNodes()
