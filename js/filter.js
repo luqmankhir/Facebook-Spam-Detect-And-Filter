@@ -6,169 +6,85 @@
 
 var xpathPatterns = [];
 
-//Empty array to stop scanning when user click cancel to spam keywords that they don't want to scan
+// Empty array to stop scanning when user clicks cancel to spam keywords that they don't want to scan
 var filteredKeywords = [];
 
-
 chrome.storage.sync.get({
-    blacklist: 'FBFilter'
+  blacklist: 'FBFilter'
 }, function(items) {
-    
-    var sourceCodeKeywords = ['Trump', 'trump', 'TRUMP'];
-    badWords = items.blacklist.toLowerCase().split(/\r?\n/);
-    var keywords = badWords.concat(sourceCodeKeywords);
 
-    for(var i = 0; i < keywords.length; i++) {
+  var sourceCodeKeywords = ['Trump', 'trump', 'TRUMP'];
+  badWords = items.blacklist.toLowerCase().split(/\r?\n/);
+  var keywords = badWords.concat(sourceCodeKeywords);
 
-        
-        var word = keywords[i];
-        xpathPatterns.push(
-            ["//body//*[not(self::script or self::style)]/text()[contains(translate(., 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), '" + word + "')]", word],
-            ["//body//a[contains(translate(@href, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'),'" + word + "')]", word],
-            ["//body//img[contains(translate(@src, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'),'" + word + "')]", word],
-            ["//body//img[contains(translate(@alt, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'),'" + word + "')]", word]        );
-    }
+  for (var i = 0; i < keywords.length; i++) {
+
+    var word = keywords[i];
+    xpathPatterns.push(
+      ["//body//*[not(self::script or self::style)]/text()[contains(translate(., 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), '" + word + "')]", word],
+      ["//body//a[contains(translate(@href, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'),'" + word + "')]", word],
+      ["//body//img[contains(translate(@src, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'),'" + word + "')]", word],
+      ["//body//img[contains(translate(@alt, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'),'" + word + "')]", word]
+    );
+  }
 });
-
 
 function confirmFilterKeyword(keyword) {
-    return confirm("Do you want to block the keywords: " + keyword + "?");
-  }
-
-
-
-//Instantly block the word\
-/*
-  function filterNodes() {
-    var array = new Array();
-    for (i = 0; i < xpathPatterns.length; i++) {
-        var xpathResult =
-            document.evaluate(xpathPatterns[i][0],
-                document, null,
-                XPathResult.UNORDERED_NODE_ITERATOR_TYPE, null);
-        var thisNode = xpathResult.iterateNext();
-        while (thisNode) {
-            // only when we have a match for the whole word add the node to the array
-            // actually we allow for variations like "_word_" "words" or "_words"
-            var regex = new RegExp("(\\b|_)(" + xpathPatterns[i][1] + ")(\\b|_|s)", "i");
-            if(regex.test(thisNode.data)) {
-                array.push(thisNode);
-            }
-            thisNode = xpathResult.iterateNext();
-        }
-    }
-
-
-    //deletedCount = deletedCount + array.length;
-    for (var i = 0; i < array.length; i++) {
-        var p = array[i].parentNode;
-        if (p !== null)
-            p.removeChild(array[i]);
-    }
+  return confirm("Do you want to block the keywords: " + keyword + "?");
 }
-*/
 
-
-//Prompt error before block the spam keywords
-/*
-    1) There's an issue where user will always need to prompt 'OK' on every each of keywords that had been detected
-    2) Everytime user click cancel and continue scrolling the web page, the prompt message will popup back
-        whether i would like to continue block the keyword that i just click Cancel.
-    3) Hovering issue everytime I hover to something, the web page will regenerate and return scanning the whole page
-        back    
-*/
-/*
-function filterNodes() {
-    var filteredNodes = [];
-  
-    for (i = 0; i < xpathPatterns.length; i++) {
-      var xpathResult = document.evaluate(xpathPatterns[i][0], document, null, XPathResult.UNORDERED_NODE_ITERATOR_TYPE, null);
-      var thisNode = xpathResult.iterateNext();
-      
-      while (thisNode) {
-        var regex = new RegExp("(\\b|_)(" + xpathPatterns[i][1] + ")(\\b|_|s)", "i");
-        if (regex.test(thisNode.data)) {
-          filteredNodes.push({ node: thisNode, keyword: xpathPatterns[i][1] });
-        }
-        thisNode = xpathResult.iterateNext();
-      }
-    }
-  
-    for (var i = 0; i < filteredNodes.length; i++) {
-      var node = filteredNodes[i].node;
-      var keyword = filteredNodes[i].keyword;
-      
-      if (confirmFilterKeyword(keyword)) {
-        var p = node.parentNode;
-        if (p !== null)
-          p.removeChild(node);
-      }
-    }
-  }
-  
-
-
-window.addEventListener("load", function() {
-    filterNodes()
-});
-*/
-
-//Prompt error before block the spam keywords
 var isFiltering = false;
+var isPromptShown = false; // Flag to track if prompt has already been shown
 
 function filterNodes() {
-    // Set the flag to indicate that filtering is in progress
-    isFiltering = true;
-  
-    var array = new Array();
-    for (i = 0; i < xpathPatterns.length; i++) {
-      var xpathResult = document.evaluate(
-        xpathPatterns[i][0],
-        document,
-        null,
-        XPathResult.UNORDERED_NODE_ITERATOR_TYPE,
-        null
-      );
-      var thisNode = xpathResult.iterateNext();
-      while (thisNode) {
-        // only when we have a match for the whole word add the node to the array
-        // actually, we allow for variations like "_word_" "words" or "_words"
-        var regex = new RegExp(
-          "(\\b|_)(" + xpathPatterns[i][1] + ")(\\b|_|s)",
-          "i"
-        );
-        if (regex.test(thisNode.data)) {
-          array.push(thisNode);
-        }
-        thisNode = xpathResult.iterateNext();
+  // Set the flag to indicate that filtering is in progress
+  isFiltering = true;
+
+  var filteredNodes = [];
+
+  for (var i = 0; i < xpathPatterns.length; i++) {
+    var xpathResult = document.evaluate(
+      xpathPatterns[i][0],
+      document,
+      null,
+      XPathResult.UNORDERED_NODE_ITERATOR_TYPE,
+      null
+    );
+    var thisNode = xpathResult.iterateNext();
+
+    while (thisNode) {
+      var regex = new RegExp("(\\b|_)(" + xpathPatterns[i][1] + ")(\\b|_|s)", "i");
+      if (regex.test(thisNode.data)) {
+        filteredNodes.push({
+          node: thisNode,
+          keyword: xpathPatterns[i][1]
+        });
       }
+      thisNode = xpathResult.iterateNext();
     }
-  
-    for (var i = 0; i < array.length; i++) {
-      var p = array[i].parentNode;
-      if (p !== null) p.removeChild(array[i]);
-    }
-  
-    // Set the flag to indicate that filtering is complete
-    isFiltering = false;
   }
- 
-  
 
+  for (var i = 0; i < filteredNodes.length; i++) {
+    var node = filteredNodes[i].node;
+    var keyword = filteredNodes[i].keyword;
 
+    if (filteredKeywords.includes(keyword)) {
+      continue; // Skip if keyword was previously cancelled
+    }
 
-/*setTimeout(filterNodes, 1000);
-setInterval(filterNodes, 2000);
+    if (confirmFilterKeyword(keyword)) {
+      var p = node.parentNode;
+      if (p !== null) {
+        p.removeChild(node);
+      }
+    } else {
+      filteredKeywords.push(keyword); // Add keyword to filtered list
+    }
+  }
 
-window.addEventListener("scroll", function() {
-    filterNodes()
-});
-*/
-
-
-
-// Initialize a flag to track if filtering is already in progress
-var isFiltering = false;
+  // Set the flag to indicate that filtering is complete
+  isFiltering = false;
+}
 
 window.addEventListener("load", function() {
   if (!isFiltering) {
@@ -188,6 +104,8 @@ setInterval(function() {
   }
 }, 2000);
 
+var scrollTimeout = null;
+
 window.addEventListener("scroll", function() {
   // Check if the filtering is already in progress, if yes, return immediately
   if (isFiltering) {
@@ -203,4 +121,32 @@ window.addEventListener("scroll", function() {
   scrollTimeout = setTimeout(function() {
     filterNodes();
   }, 500);
+});
+
+// Alert and prompt for enabling spam filtering if at least one spam keyword is detected
+function showFilteringPrompt() {
+  alert("Spam keywords detected on the page. Do you want to enable spam filtering?");
+  var enableFiltering = confirm("Enable spam filtering?");
+  if (enableFiltering) {
+    filterNodes();
+  }
+  isPromptShown = true; // Set the flag to indicate that the prompt has been shown
+}
+
+// Check for spam keywords on page load
+window.addEventListener("load", function() {
+  var hasSpamKeywords = xpathPatterns.some(function(pattern) {
+    var xpathResult = document.evaluate(
+      pattern[0],
+      document,
+      null,
+      XPathResult.FIRST_ORDERED_NODE_TYPE,
+      null
+    );
+    return xpathResult.singleNodeValue !== null;
+  });
+
+  if (hasSpamKeywords && !isPromptShown) { // Show prompt only if not already shown
+    showFilteringPrompt();
+  }
 });
