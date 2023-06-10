@@ -13,7 +13,12 @@ chrome.storage.sync.get({
   blacklist: 'FBFilter'
 }, function(items) {
 
-  var sourceCodeKeywords = ['Trump', 'trump', 'TRUMP'];
+  //var sourceCodeKeywords = ['Trump', 'trump', 'TRUMP'];
+  //import dataset of spam keywords from spamkeywords.js
+  var script = document.createElement('script');
+  script.src = 'spamkeywords.js';
+  document.head.appendChild(script);
+  
   badWords = items.blacklist.toLowerCase().split(/\r?\n/);
   var keywords = badWords.concat(sourceCodeKeywords);
 
