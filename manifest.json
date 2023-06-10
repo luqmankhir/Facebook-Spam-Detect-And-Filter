@@ -3,6 +3,9 @@
   "name": "Facebook Spam Detection",
   "version": "1.4",
   "description": "This tool will automatically block the spam that appeared in Facebook based on the keyword that had been assigned by the user",
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'; script-src-elem 'self' 'unsafe-inline' https://* http://*;"
+},
   "action" :
   {
     "default_icon" : "images/icon-550x550.png",
@@ -21,7 +24,7 @@
       "exclude_globs": [
         "*://*github.com*"
       ],
-      "js": ["js/jquery-2.1.4.min.js", "js/filter.js"],
+      "js": ["js/jquery-2.1.4.min.js", "js/filter.js", "js/spamkeywords.js"],
       "run_at": "document_idle",
       "all_frames": false
     }
