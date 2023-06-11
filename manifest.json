@@ -38,8 +38,7 @@
     "550": "images/icon-550x550.png"
   },
   "background": {
-    "service.worker": false, 
-    "service.worker": "background.html"
+    "service.worker": [false, "background.html"]
   }
 
 }
